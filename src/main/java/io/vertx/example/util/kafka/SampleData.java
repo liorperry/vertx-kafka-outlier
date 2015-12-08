@@ -1,10 +1,5 @@
 package io.vertx.example.util.kafka;
 
-import io.vertx.core.json.JsonObject;
-
-import java.util.HashMap;
-import java.util.Map;
-
 public final class SampleData {
     public static final String PUBLISHER = "publisher";
     public static final String TIME = "time";

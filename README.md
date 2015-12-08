@@ -57,6 +57,12 @@ isOutlier = sampleData[i].distance >  outlierFactor*deviation(sampleData[1..n])
  ** SamplePersister - sample data DAO interface
 
 * Running tests - todo run this in single test uberJar
+** Binding ports - todo add vert.x configuration dynamic port support
+    zookeeper:2181
+    kafka:9090
+    web:8081
+    redis:6379
+
  * start RedisStarter        (start embedded redis )
  * start KafkaServerVertical (starts embedded ZK + Kafka)
  * start SimpleKafkaProducer (start zk topic producer)

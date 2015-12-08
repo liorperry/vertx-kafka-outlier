@@ -1,5 +1,6 @@
 package io.vertx.example.kafka.integration;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.example.util.kafka.BasicSampleExtractor;
 import io.vertx.example.util.kafka.SampleData;
@@ -20,6 +21,14 @@ public abstract class KafkaTestUtils {
             result.add(extractor.extractSample(new JsonObject(buildMessage(publisherId,readingSampleSize))).get());
         }
         return result;
+    }
+
+    public static JsonArray createJson(String publisherId,int size,int readingSampleSize) {
+        JsonArray array = new JsonArray();
+        for (int i = 0; i < size; i++) {
+            array.add(new JsonObject(buildMessage(publisherId,readingSampleSize)));
+        }
+        return array;
     }
 
     private static Map<String, Object> buildMessage(String publisherId, int readingSampleSize) {

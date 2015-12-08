@@ -13,6 +13,7 @@ import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static io.vertx.example.kafka.integration.KafkaTestUtils.createJson;
 import static io.vertx.example.util.VertxInitUtils.initDeploymentOptions;
 import static io.vertx.example.util.kafka.BasicSampleExtractor.toJson;
 
@@ -54,7 +55,7 @@ public class SimpleKafkaProducer extends AbstractVerticle {
         vertx.setPeriodic(sampleFrequence, event -> {
             System.out.println("sending message to kafka:" + kafkaPort);
             executor.submit(() -> {
-                producer.send(topic, "message", toJson(KafkaTestUtils.create("norbert", 1, 15).get(0)).encode());
+                producer.send(topic, "message", createJson("norbert", 1, 15).getJsonObject(0).encode());
             });
         });
         fut.complete();
