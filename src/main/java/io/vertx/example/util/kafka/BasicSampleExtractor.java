@@ -4,11 +4,21 @@ import io.vertx.core.json.JsonObject;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static io.vertx.example.util.kafka.SampleData.*;
 
 public class BasicSampleExtractor implements SampleExtractor{
+
+    public static JsonObject toJson(SampleData data) {
+        Map<String,Object> map = new HashMap<>();
+        map.put(PUBLISHER,data.getPublishId());
+        map.put(TIME,data.getTime());
+        map.put(MEDIAN,data.getMedian());
+        return new JsonObject(map);
+    }
 
     @Override
     public Optional<SampleData> extractSample(JsonObject result) {

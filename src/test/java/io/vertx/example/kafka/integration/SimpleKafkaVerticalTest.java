@@ -6,10 +6,7 @@ import io.vertx.example.util.kafka.BasicSampleExtractor;
 import io.vertx.example.util.kafka.InMemSamplePersister;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
@@ -18,6 +15,7 @@ import static io.vertx.example.util.VertxInitUtils.*;
 
 
 @RunWith(VertxUnitRunner.class)
+@Ignore
 public class SimpleKafkaVerticalTest {
 
     public static final String LOCALHOST = "localhost";

@@ -3,7 +3,7 @@ package io.vertx.example.kafka.integration;
 import io.vertx.example.util.kafka.Consumer;
 import io.vertx.example.util.kafka.KafkaLocal;
 import io.vertx.example.util.kafka.Producer;
-import io.vertx.example.kafka.ZookeeperLocal;
+import io.vertx.example.util.kafka.ZookeeperLocal;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

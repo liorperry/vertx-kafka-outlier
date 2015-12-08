@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static io.vertx.example.util.kafka.BasicSampleExtractor.*;
+
 public class RedisSamplePersister implements SamplePersister {
     public static final String PUBLISHERS = "publishers";
     private JedisPool pool;
@@ -29,7 +31,7 @@ public class RedisSamplePersister implements SamplePersister {
         Jedis resource = pool.getResource();
         try {
             resource.sadd(PUBLISHERS,data.getPublishId());
-            resource.lpush(data.getPublishId(), data.toJson().encodePrettily());
+            resource.lpush(data.getPublishId(), toJson(data).encodePrettily());
         } finally {
             resource.close();
         }

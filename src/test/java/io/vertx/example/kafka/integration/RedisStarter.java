@@ -1,4 +1,4 @@
-package io.vertx.example.unit.test.integration;
+package io.vertx.example.kafka.integration;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -11,7 +11,7 @@ import redis.embedded.exceptions.EmbeddedRedisException;
 
 import java.io.IOException;
 
-public class RedisStarted extends AbstractVerticle {
+public class RedisStarter extends AbstractVerticle {
     public static final String SERVICES = "services";
     public static final String PRODUCTS = "products";
     public static final String CHANNEL_INTERNET = "channel.internet";
@@ -20,14 +20,14 @@ public class RedisStarted extends AbstractVerticle {
     private final Jedis jedis;
     private boolean populate;
 
-    public RedisStarted(Jedis client,boolean populate) {
+    public RedisStarter(Jedis client, boolean populate) {
         jedis = client;
         this.populate = populate;
     }
 
     public static void main(String[] args) throws Exception {
         Vertx vertx = Vertx.vertx();
-        vertx.deployVerticle(new RedisStarted(new Jedis(),false));
+        vertx.deployVerticle(new RedisStarter(new Jedis(),false));
     }
 
     public void start(Future<Void> fut) {

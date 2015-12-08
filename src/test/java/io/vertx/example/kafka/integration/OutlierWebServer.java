@@ -35,10 +35,6 @@ public class OutlierWebServer extends AbstractVerticle {
         DeploymentOptions options = VertxInitUtils.initDeploymentOptions();
         SamplePersister persister = new RedisSamplePersister(new JedisPool(),new BasicSampleExtractor());
         SimpleDistanceOutlierDetector detector = new SimpleDistanceOutlierDetector(persister);
-/*
-        persister.persist(KafkaTestUtils.create("norbert", 100, 15));
-        persister.persist(KafkaTestUtils.create("ginzburg", 300, 10));
-*/
         vertx.deployVerticle(new OutlierWebServer(detector,persister, 8081,2181,9090), options);
     }
 

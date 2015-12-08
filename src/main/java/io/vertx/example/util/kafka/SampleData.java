@@ -34,13 +34,6 @@ public final class SampleData {
         return median;
     }
 
-    public JsonObject toJson() {
-        Map<String,Object> map = new HashMap<>();
-        map.put(PUBLISHER,publishId);
-        map.put(TIME,time);
-        map.put(MEDIAN,median);
-        return new JsonObject(map);
-    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
