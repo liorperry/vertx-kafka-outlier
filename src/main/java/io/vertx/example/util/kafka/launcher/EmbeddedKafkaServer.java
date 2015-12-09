@@ -1,4 +1,4 @@
-package io.vertx.example.kafka.integration;
+package io.vertx.example.util.kafka.launcher;
 
 import io.vertx.example.util.kafka.Consumer;
 import io.vertx.example.util.kafka.KafkaLocal;

@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 
 import java.util.*;
 
-import static io.vertx.example.kafka.integration.KafkaTestUtils.*;
+import static io.vertx.example.util.kafka.launcher.KafkaTestUtils.*;
 import static io.vertx.example.util.kafka.SampleData.READINGS;
 import static junit.framework.Assert.*;
 

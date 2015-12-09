@@ -1,4 +1,4 @@
-package io.vertx.example.kafka.integration;
+package io.vertx.example.util.kafka.launcher;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

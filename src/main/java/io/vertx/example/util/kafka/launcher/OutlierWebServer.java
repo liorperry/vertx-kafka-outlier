@@ -1,4 +1,4 @@
-package io.vertx.example.kafka.integration;
+package io.vertx.example.util.kafka.launcher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.vertx.core.AbstractVerticle;

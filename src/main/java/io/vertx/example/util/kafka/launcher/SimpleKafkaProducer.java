@@ -1,4 +1,4 @@
-package io.vertx.example.kafka.integration;
+package io.vertx.example.util.kafka.launcher;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
@@ -9,13 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static io.vertx.example.kafka.integration.KafkaTestUtils.createJson;
+import static io.vertx.example.util.kafka.launcher.KafkaTestUtils.createJson;
 import static io.vertx.example.util.VertxInitUtils.initDeploymentOptions;
-import static io.vertx.example.util.kafka.BasicSampleExtractor.toJson;
 
 
 public class SimpleKafkaProducer extends AbstractVerticle {
@@ -28,14 +30,16 @@ public class SimpleKafkaProducer extends AbstractVerticle {
     private Properties producerProperties;
     private String topic;
     private final int kafkaPort;
+    private String[] publishers;
 
     public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
         DeploymentOptions options = initDeploymentOptions();
-        vertx.deployVerticle(new SimpleKafkaProducer("test", 9090, 3000), options);
+        vertx.deployVerticle(new SimpleKafkaProducer("test", 9090, 3000, args), options);
     }
 
-    public SimpleKafkaProducer(String topic, int kafkaPort, int sampleFrequence) {
+    public SimpleKafkaProducer(String topic, int kafkaPort, int sampleFrequence, String... publishers) {
+        this.publishers = publishers;
         try {
             this.sampleFrequence = sampleFrequence;
             this.kafkaPort = kafkaPort;
@@ -52,15 +56,15 @@ public class SimpleKafkaProducer extends AbstractVerticle {
     }
 
     public void start(Future<Void> fut) {
-        vertx.setPeriodic(sampleFrequence, event -> {
-            System.out.println("sending message to kafka:" + kafkaPort);
-            executor.submit(() -> {
-                producer.send(topic, "message", createJson("norbert", 1, 15).getJsonObject(0).encode());
-            });
-        });
+        Arrays.asList(publishers).forEach(s ->
+                vertx.setPeriodic(sampleFrequence, event -> {
+                    System.out.println("sending message to kafka:" + kafkaPort);
+                    executor.submit(() -> {
+                        producer.send(topic, "message", createJson(s, 1, 15).getJsonObject(0).encode());
+                    });
+                }));
         fut.complete();
     }
-
 
 
     @Override
