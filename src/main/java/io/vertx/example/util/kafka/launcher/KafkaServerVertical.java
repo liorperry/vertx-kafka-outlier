@@ -19,7 +19,19 @@ public class KafkaServerVertical extends AbstractVerticle {
     public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
         DeploymentOptions options = VertxInitUtils.initDeploymentOptions();
-        vertx.deployVerticle(new KafkaServerVertical(2181,9090),options);
+        int kafkaPort = 9090;
+        int zkPort = 2181;
+
+        if (args.length == 2) {
+            try {
+                kafkaPort = Integer.valueOf(args[0]);
+                zkPort = Integer.valueOf(args[1]);
+            } catch (NumberFormatException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+
+        vertx.deployVerticle(new KafkaServerVertical(zkPort, kafkaPort), options);
     }
 
     private Optional<EmbeddedKafkaServer> kafkaServer = Optional.empty();
@@ -29,7 +41,7 @@ public class KafkaServerVertical extends AbstractVerticle {
         launchKafka();
     }
 
-    public KafkaServerVertical(int zkPort , int kafkaPort) {
+    public KafkaServerVertical(int zkPort, int kafkaPort) {
         this.kafkaPort = kafkaPort;
         this.zkPort = zkPort;
         launchKafka();
@@ -40,8 +52,8 @@ public class KafkaServerVertical extends AbstractVerticle {
     }
 
     private void launchKafka() {
-        if(!kafkaServer.isPresent()) {
-            kafkaServer = Optional.of(new EmbeddedKafkaServer(zkPort,kafkaPort));
+        if (!kafkaServer.isPresent()) {
+            kafkaServer = Optional.of(new EmbeddedKafkaServer(zkPort, kafkaPort));
         }
         System.out.println("starting kafka embedded server");
         kafkaServer.get().start();

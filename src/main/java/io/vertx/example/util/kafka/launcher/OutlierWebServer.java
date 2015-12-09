@@ -35,7 +35,20 @@ public class OutlierWebServer extends AbstractVerticle {
         DeploymentOptions options = VertxInitUtils.initDeploymentOptions();
         SamplePersister persister = new RedisSamplePersister(new JedisPool(),new BasicSampleExtractor());
         SimpleDistanceOutlierDetector detector = new SimpleDistanceOutlierDetector(persister);
-        vertx.deployVerticle(new OutlierWebServer(detector,persister, 8081,2181,9090), options);
+        int webPort = 8081;
+        int kafkaPort = 9090;
+        int zkPort = 2181;
+
+        if (args.length == 3) {
+            try {
+                kafkaPort = Integer.valueOf(args[0]);
+                zkPort = Integer.valueOf(args[1]);
+                webPort = Integer.valueOf(args[2]);
+            } catch (NumberFormatException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        vertx.deployVerticle(new OutlierWebServer(detector,persister, webPort,zkPort,kafkaPort), options);
     }
 
     public OutlierWebServer(OutlierDetector detector,SamplePersister persister, int httpPort,int zkPort,int kafkaPort) throws IOException {

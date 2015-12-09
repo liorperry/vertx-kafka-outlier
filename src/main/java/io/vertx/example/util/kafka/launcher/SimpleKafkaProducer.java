@@ -35,7 +35,17 @@ public class SimpleKafkaProducer extends AbstractVerticle {
     public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
         DeploymentOptions options = initDeploymentOptions();
-        vertx.deployVerticle(new SimpleKafkaProducer("test", 9090, 3000, args), options);
+        int kafkaPort = 9090;
+
+        if (args.length > 0) {
+            try {
+                kafkaPort = Integer.valueOf(args[0]);
+            } catch (NumberFormatException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        //deploy vertical
+        vertx.deployVerticle(new SimpleKafkaProducer("test",kafkaPort , 3000, args), options);
     }
 
     public SimpleKafkaProducer(String topic, int kafkaPort, int sampleFrequence, String... publishers) {

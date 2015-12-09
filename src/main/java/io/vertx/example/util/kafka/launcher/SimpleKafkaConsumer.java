@@ -31,10 +31,19 @@ public class SimpleKafkaConsumer extends AbstractVerticle {
         Vertx vertx = Vertx.vertx();
         DeploymentOptions options = VertxInitUtils.initDeploymentOptions();
         BasicSampleExtractor extractor = new BasicSampleExtractor();
+        int zkPort = 2181;
+
+        if (args.length == 1) {
+            try {
+                zkPort = Integer.valueOf(args[0]);
+            } catch (NumberFormatException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        //deploy vertical
         vertx.deployVerticle(new SimpleKafkaConsumer(
                 new RedisSamplePersister(new JedisPool(), extractor),
-                extractor,
-                "test", 2181, 3000), options);
+                extractor,"test", zkPort, 3000), options);
     }
 
     public SimpleKafkaConsumer(SamplePersister persister,
