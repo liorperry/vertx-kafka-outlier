@@ -8,7 +8,7 @@ set jar=vertx-kafka-outlier-3.1.0-fat.jar
 echo %location%/%jar%
 
 echo Redis starting ...
-REM start "Redis" java -cp %location%/%jar% io.vertx.example.util.kafka.launcher.RedisStarter
+start "Redis" java -cp %location%/%jar% io.vertx.example.util.kafka.launcher.RedisStarter
 
 SLEEP 5
 

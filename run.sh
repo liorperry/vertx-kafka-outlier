@@ -7,7 +7,7 @@ mvn clean install
 cd target
 
 echo 'Redis starting ...'
-#java -cp vertx-kafka-outlier-3.1.0-fat.jar io.vertx.example.util.kafka.launcher.RedisStarter &
+java -cp vertx-kafka-outlier-3.1.0-fat.jar io.vertx.example.util.kafka.launcher.RedisStarter &
 
 sleep 5
 
