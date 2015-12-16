@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class SimpleDistanceOutlierDetector implements OutlierDetector {
+    public static final String SIMPLE = "simple";
     private SamplePersister persister;
 
     public SimpleDistanceOutlierDetector(SamplePersister persister) {
@@ -25,6 +26,11 @@ public class SimpleDistanceOutlierDetector implements OutlierDetector {
         double mean = stats.getMean();
         List<SampleData> outliers = fetch.stream().filter(sampleData -> isOutlier(deviation, mean, sampleData,outlierFactor.orElse(2d))).collect(Collectors.toList());
         return outliers;
+    }
+
+    @Override
+    public String getName() {
+        return SIMPLE;
     }
 
     public boolean isOutlier(double deviation, double mean, SampleData sampleData, double outlierFactor) {

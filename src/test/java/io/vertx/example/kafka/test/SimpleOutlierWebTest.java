@@ -5,11 +5,13 @@ import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.example.util.VertxInitUtils;
+import io.vertx.example.util.kafka.ComplexDistanceOutlierDetector;
+import io.vertx.example.util.kafka.InMemSamplePersister;
+import io.vertx.example.util.kafka.OutlierDetector;
+import io.vertx.example.util.kafka.SimpleDistanceOutlierDetector;
 import io.vertx.example.util.kafka.launcher.KafkaTestUtils;
 import io.vertx.example.util.kafka.launcher.OutlierWebServer;
-import io.vertx.example.util.VertxInitUtils;
-import io.vertx.example.util.kafka.InMemSamplePersister;
-import io.vertx.example.util.kafka.SimpleDistanceOutlierDetector;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -19,6 +21,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(VertxUnitRunner.class)
 public class SimpleOutlierWebTest {
@@ -32,7 +36,10 @@ public class SimpleOutlierWebTest {
         vertx = Vertx.vertx(VertxInitUtils.initOptions());
         InMemSamplePersister persister = new InMemSamplePersister();
         prePopulateData(persister);
-        vertx.deployVerticle(new OutlierWebServer(new SimpleDistanceOutlierDetector(persister), persister,8081,2181,9090),
+        List<OutlierDetector> detectors = new ArrayList<>();
+        detectors.add(new SimpleDistanceOutlierDetector(persister));
+        detectors.add(new ComplexDistanceOutlierDetector(persister));
+        vertx.deployVerticle(new OutlierWebServer(detectors, persister,8081,2181,9090),
                 options,context.asyncAssertSuccess());
     }
 
@@ -63,12 +70,42 @@ public class SimpleOutlierWebTest {
     }
 
     @Test
-    public void testPublisherOutlier(TestContext context) {
+    public void testSimplePublisherOutlier(TestContext context) {
         Async async = context.async();
         HttpClient client = vertx.createHttpClient();
-        client.getNow(8081, LOCALHOST, "/publisher/outlier/ginzburg?windowSize=100;outlierFactor=0.2", resp -> {
+        client.getNow(8081, LOCALHOST, "/publisher/outlier/ginzburg?windowSize=100;outlierName=simple;outlierFactor=0.2", resp -> {
             resp.bodyHandler(body -> {
-                System.out.println("/publisher/outlier/ginzburg?windowSize=100;outlierFactor=0.2" + ":" + resp.statusCode() + " [" + body.toString() + "]");
+                System.out.println("/publisher/outlier/ginzburg?windowSize=100;outlierName=simple;outlierFactor=0.2" + ":" + resp.statusCode() + " [" + body.toString() + "]");
+                JsonArray result = new JsonArray(body.toString());
+                context.assertTrue(result.size() > 0);
+//                client.close();
+                async.complete();
+            });
+        });
+    }
+
+    @Test
+    public void testComplexPublisherOutlier(TestContext context) {
+        Async async = context.async();
+        HttpClient client = vertx.createHttpClient();
+        client.getNow(8081, LOCALHOST, "/publisher/outlier/ginzburg?windowSize=100;outlierName=complex;outlierFactor=0.9", resp -> {
+            resp.bodyHandler(body -> {
+                System.out.println("/publisher/outlier/ginzburg?windowSize=100;outlierName=complex;outlierFactor=0.9" + ":" + resp.statusCode() + " [" + body.toString() + "]");
+                JsonArray result = new JsonArray(body.toString());
+                context.assertTrue(result.size() > 0);
+//                client.close();
+                async.complete();
+            });
+        });
+    }
+
+    @Test
+    public void testComparePublisherOutlier(TestContext context) {
+        Async async = context.async();
+        HttpClient client = vertx.createHttpClient();
+        client.getNow(8081, LOCALHOST, "/publisher/outlierCompare/ginzburg?windowSize=100;outlierName=complex", resp -> {
+            resp.bodyHandler(body -> {
+                System.out.println("/publisher/outlierCompare/ginzburg?windowSize=100;outlierName=complex;" + ":" + resp.statusCode() + " [" + body.toString() + "]");
                 JsonArray result = new JsonArray(body.toString());
                 context.assertTrue(result.size() > 0);
 //                client.close();

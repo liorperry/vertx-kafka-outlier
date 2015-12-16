@@ -24,7 +24,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class OutlierWebServer extends AbstractVerticle {
-    private OutlierDetector detector;
+    private Map<String,OutlierDetector> detectors;
     private SamplePersister persister;
     private int httpPort;
     private ZooKeeper zk;
@@ -34,7 +34,11 @@ public class OutlierWebServer extends AbstractVerticle {
         Vertx vertx = Vertx.vertx();
         DeploymentOptions options = VertxInitUtils.initDeploymentOptions();
         SamplePersister persister = new RedisSamplePersister(new JedisPool(),new BasicSampleExtractor());
-        SimpleDistanceOutlierDetector detector = new SimpleDistanceOutlierDetector(persister);
+        List<OutlierDetector> detectors = new ArrayList<>();
+        SimpleDistanceOutlierDetector detector1 = new SimpleDistanceOutlierDetector(persister);
+        ComplexDistanceOutlierDetector detector2 = new ComplexDistanceOutlierDetector(persister);
+        detectors.add(detector1);
+        detectors.add(detector2);
         int webPort = 8081;
         int kafkaPort = 9090;
         int zkPort = 2181;
@@ -48,15 +52,23 @@ public class OutlierWebServer extends AbstractVerticle {
                 System.out.println(e.getMessage());
             }
         }
-        vertx.deployVerticle(new OutlierWebServer(detector,persister, webPort,zkPort,kafkaPort), options);
+        vertx.deployVerticle(new OutlierWebServer(detectors,persister, webPort,zkPort,kafkaPort), options);
     }
 
-    public OutlierWebServer(OutlierDetector detector,SamplePersister persister, int httpPort,int zkPort,int kafkaPort) throws IOException {
-        this.detector = detector;
+    public OutlierWebServer(List<OutlierDetector> detectors,SamplePersister persister, int httpPort,int zkPort,int kafkaPort) throws IOException {
+        this.detectors = toMap(detectors);
         this.persister = persister;
         this.httpPort = httpPort;
         this.zk = new ZooKeeper("localhost:"+zkPort, 10000, null);
         consumer = new SimpleConsumer("localhost",kafkaPort,100000,64 * 1024, "test");
+    }
+
+    private Map<String, OutlierDetector> toMap(List<OutlierDetector> detectors) {
+        Map<String, OutlierDetector> map = new HashMap<>();
+        for (OutlierDetector detector : detectors) {
+            map.put(detector.getName(),detector);
+        }
+        return map;
     }
 
     @Override
@@ -69,6 +81,7 @@ public class OutlierWebServer extends AbstractVerticle {
         router.get("/publisher").handler(this::publishersList);
         router.get("/publisher/:publisherId").handler(this::publisherInfo);
         router.get("/publisher/outlier/:publisherId").handler(this::outlier);
+        router.get("/publisher/outlierCompare/:publisherId").handler(this::outlierCompare);
         router.get("/kafka/all").handler(this::kafkaInfo);
         router.get("/kafka/brokers").handler(this::brokersList);
         System.out.println("Listening for http://{hostname}:" + httpPort + "/kafka/brokers");
@@ -165,20 +178,51 @@ public class OutlierWebServer extends AbstractVerticle {
     private void outlier(RoutingContext routingContext) {
         HttpServerResponse response = routingContext.response();
         String publisherId = routingContext.request().getParam("publisherId");
+        String outlierName = routingContext.request().getParam("outlierName");
         if (publisherId == null) {
             sendError(400, response);
         }
         Optional<String> windowSize = Optional.ofNullable(routingContext.request().getParam("windowSize"));
         Optional<String> outlierFactor = Optional.ofNullable(routingContext.request().getParam("outlierFactor"));
 
+        if(!detectors.containsKey(outlierName) || outlierName==null){
+            sendError(400, response);
+
+        }
+        OutlierDetector detector = detectors.get(outlierName);
         List<SampleData> outliers = detector.getOutlier(publisherId, Integer.valueOf(windowSize.orElse("10")), Optional.of(Double.valueOf(outlierFactor.orElse("2"))));
         JsonArray array = new JsonArray(outliers);
+        response.putHeader("content-type", "application/json").end(array.encodePrettily());
+    }
+
+    private void outlierCompare(RoutingContext routingContext) {
+        HttpServerResponse response = routingContext.response();
+        String publisherId = routingContext.request().getParam("publisherId");
+        if (publisherId == null) {
+            sendError(400, response);
+        }
+        Optional<String> windowSize = Optional.ofNullable(routingContext.request().getParam("windowSize"));
+        Optional<String> outlierFactor = Optional.ofNullable(routingContext.request().getParam("outlierFactor"));
+
+        JsonArray array = new JsonArray();
+        for (OutlierDetector detector : detectors.values()) {
+            List<SampleData> outlier = detector.getOutlier(publisherId, Integer.valueOf(windowSize.orElse("10")), Optional.empty());
+            array.add(toJson(detector.getName(),outlier.size()));
+        }
         response.putHeader("content-type", "application/json").end(array.encodePrettily());
     }
 
 
     private void sendError(int statusCode, HttpServerResponse response) {
         response.setStatusCode(statusCode).end();
+    }
+
+
+    public static JsonObject toJson(String name,int outliers) {
+        Map<String,Object> map = new HashMap<>();
+        map.put("DetectorName",name);
+        map.put("Irregulars#",outliers);
+        return new JsonObject(map);
     }
 
 }

@@ -37,7 +37,7 @@ public class BasicSampleExtractor implements SampleExtractor{
                     median = stats.getPercentile(50);
                     //persist sample data
                 }
-                return Optional.of(new SampleData(publisher,time,median));
+                return Optional.of(new SampleData(publisher,time,median,values ));
             }
         return Optional.empty();
     }

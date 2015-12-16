@@ -1,5 +1,7 @@
 package io.vertx.example.util.kafka;
 
+import java.util.Arrays;
+
 public final class SampleData {
     public static final String PUBLISHER = "publisher";
     public static final String TIME = "time";
@@ -10,11 +12,14 @@ public final class SampleData {
     private final String publishId;
     private final String time;
     private final double median;
+    private double readings[];
 
-    public SampleData(String publishId, String time, double median) {
+
+    public SampleData(String publishId, String time, double median, double[] readings) {
         this.publishId = publishId;
         this.time = time;
         this.median = median;
+        this.readings = readings;
     }
 
     public String getPublishId() {
@@ -29,7 +34,11 @@ public final class SampleData {
         return median;
     }
 
-    @Override
+    public double[] getReadings() {
+        return readings;
+    }
+
+        @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -40,6 +49,16 @@ public final class SampleData {
         if (!publishId.equals(that.publishId)) return false;
         return time.equals(that.time);
 
+    }
+
+    @Override
+    public String toString() {
+        return "SampleData{" +
+                "publishId='" + publishId + '\'' +
+                ", time='" + time + '\'' +
+                ", median=" + median +
+                ", readings=" + Arrays.toString(readings) +
+                '}';
     }
 
     @Override

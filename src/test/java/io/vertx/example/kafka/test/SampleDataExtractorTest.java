@@ -11,8 +11,9 @@ import org.junit.runner.RunWith;
 
 import java.util.*;
 
-import static io.vertx.example.util.kafka.launcher.KafkaTestUtils.*;
 import static io.vertx.example.util.kafka.SampleData.READINGS;
+import static io.vertx.example.util.kafka.launcher.KafkaTestUtils.create;
+import static io.vertx.example.util.kafka.launcher.KafkaTestUtils.createJson;
 import static junit.framework.Assert.*;
 
 @RunWith(VertxUnitRunner.class)
@@ -57,6 +58,7 @@ public class SampleDataExtractorTest {
         assertEquals(sampleData.get().getMedian() , median);
     }
 
+    @Test
     public void testDataExtractor() throws Exception {
         BasicSampleExtractor extractor = new BasicSampleExtractor();
         Optional<SampleData> sampleData = extractor.extractSample(new JsonObject(buildMessage()));
@@ -64,6 +66,8 @@ public class SampleDataExtractorTest {
         assertEquals(sampleData.get().getPublishId(), "norbert");
         assertEquals(sampleData.get().getTime(), NOW);
         assertEquals(sampleData.get().getMedian(), 10.5);
+        assertTrue(sampleData.get().getReadings().length > 0);
+
     }
 
     public Map<String, Object> buildMessage() {

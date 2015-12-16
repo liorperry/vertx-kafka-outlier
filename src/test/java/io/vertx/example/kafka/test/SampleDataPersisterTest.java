@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 @RunWith(VertxUnitRunner.class)
 public class SampleDataPersisterTest {
@@ -34,6 +35,8 @@ public class SampleDataPersisterTest {
         assertEquals(persister.fetchAll(NORBERT).size(),10);
         assertEquals(persister.fetch(NORBERT, 5).size(),5);
         assertEquals(persister.fetch(NORBERT, 0).size(),0);
+
+        assertTrue(persister.fetch(NORBERT, 1).get(0).getReadings().length > 0);
 
         assertEquals(persister.fetchAll(GINSBURG).size(),10);
         assertEquals(persister.fetch(GINSBURG, 7).size(),7);
