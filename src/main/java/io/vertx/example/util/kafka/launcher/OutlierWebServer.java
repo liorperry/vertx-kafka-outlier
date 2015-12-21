@@ -92,7 +92,7 @@ public class OutlierWebServer extends AbstractVerticle {
         System.out.println("Listening for http://{hostname}:" + httpPort + "/kafka/all");
         System.out.println("Listening for http://{hostname}:" + httpPort + "/publisher");
         System.out.println("Listening for http://{hostname}:" + httpPort + "/publisher/:{publisherId}");
-        System.out.println("Listening for http://{hostname}:" + httpPort + "/publisher/outlier/:{publisherId}?windowSize=10;outlierFactor=2");
+        System.out.println("Listening for http://{hostname}:" + httpPort + "/publisher/outlier/:{publisherId}?windowSize=10;outlierFactor=2;outlierName={simple|complex}");
         System.out.println("Listening for http://{hostname}:" + httpPort + "/publisher/outlierCompare/:{publisherId}?windowSize=10;outlierFactor=2");
 
         httpServer.requestHandler(router::accept).listen(httpPort, result -> {
