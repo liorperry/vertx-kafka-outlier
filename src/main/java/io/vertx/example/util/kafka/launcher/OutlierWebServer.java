@@ -73,10 +73,13 @@ public class OutlierWebServer extends AbstractVerticle {
 
     @Override
     public void start(Future<Void> startFuture) throws Exception {
+        if(detectors.isEmpty()) {
+            throw new RuntimeException("Outlier Detectors List not initiated");
+        }
+
         Router router = Router.router(vertx);
         //http server
         HttpServer httpServer = vertx.createHttpServer();
-
         router.route().handler(BodyHandler.create());
         router.get("/publisher").handler(this::publishersList);
         router.get("/publisher/:publisherId").handler(this::publisherInfo);
@@ -84,11 +87,13 @@ public class OutlierWebServer extends AbstractVerticle {
         router.get("/publisher/outlierCompare/:publisherId").handler(this::outlierCompare);
         router.get("/kafka/all").handler(this::kafkaInfo);
         router.get("/kafka/brokers").handler(this::brokersList);
+
         System.out.println("Listening for http://{hostname}:" + httpPort + "/kafka/brokers");
         System.out.println("Listening for http://{hostname}:" + httpPort + "/kafka/all");
         System.out.println("Listening for http://{hostname}:" + httpPort + "/publisher");
         System.out.println("Listening for http://{hostname}:" + httpPort + "/publisher/:{publisherId}");
         System.out.println("Listening for http://{hostname}:" + httpPort + "/publisher/outlier/:{publisherId}?windowSize=10;outlierFactor=2");
+        System.out.println("Listening for http://{hostname}:" + httpPort + "/publisher/outlierCompare/:{publisherId}?windowSize=10;outlierFactor=2");
 
         httpServer.requestHandler(router::accept).listen(httpPort, result -> {
             if (result.succeeded()) {
@@ -186,9 +191,11 @@ public class OutlierWebServer extends AbstractVerticle {
         Optional<String> outlierFactor = Optional.ofNullable(routingContext.request().getParam("outlierFactor"));
 
         if(!detectors.containsKey(outlierName) || outlierName==null){
-            sendError(400, response);
-
+            //first detector on list as default detector
+            outlierName = detectors.values().iterator().next().getName();
+//            sendError(400, response);
         }
+
         OutlierDetector detector = detectors.get(outlierName);
         List<SampleData> outliers = detector.getOutlier(publisherId, Integer.valueOf(windowSize.orElse("10")), Optional.of(Double.valueOf(outlierFactor.orElse("2"))));
         JsonArray array = new JsonArray(outliers);
@@ -202,7 +209,6 @@ public class OutlierWebServer extends AbstractVerticle {
             sendError(400, response);
         }
         Optional<String> windowSize = Optional.ofNullable(routingContext.request().getParam("windowSize"));
-        Optional<String> outlierFactor = Optional.ofNullable(routingContext.request().getParam("outlierFactor"));
 
         JsonArray array = new JsonArray();
         for (OutlierDetector detector : detectors.values()) {
