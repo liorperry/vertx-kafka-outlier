@@ -38,7 +38,7 @@ public class ComplexDistanceOutlierDetectorTest {
         SampleData sampleData = extractor.extractSample(new JsonObject(buildMessage2(0))).get();
         List<SampleData> outlier = detector.getOutlier(NORBERT, 1, Optional.<Double>empty());
         assertTrue(sampleData.getReadings().length > 0);
-        assertTrue(!outlier.isEmpty());
+        assertTrue(outlier.isEmpty());
 
     }
 
@@ -48,8 +48,8 @@ public class ComplexDistanceOutlierDetectorTest {
         SampleData sampleData = extractor.extractSample(new JsonObject(buildMessage1(0))).get();
         List<SampleData> outlier = detector.getOutlier(NORBERT, 1, Optional.<Double>empty());
         assertTrue(sampleData.getReadings().length > 0);
-        assertTrue(!outlier.isEmpty());
-        assertEquals(outlier.size(), 1);
+        assertTrue(outlier.isEmpty());
+        assertEquals(outlier.size(), 0);
 
     }
 
